@@ -3,6 +3,35 @@
 #
 import urllib2
 import json
+import os
+import urlparse
+
+class HeatEndpoints(object):
+    def __init__(self, folder):
+	self.folder = folder
+	self.endpoints = []
+    def collect(self):
+	endpoint_baseurl = 'http://10.30.31.121/heat_log/'
+	filenames = os.listdir('/var/www/html/heat_log/')
+	for filename in filenames:
+	    if filename.endswith(".log"):
+		endpoint = urlparse.urljoin(endpoint_baseurl, filename)
+		self.endpoints.append(endpoint)
+	return self.endpoints
+
+class HeatStatistics(object):
+    def __init__(self):
+	self._count_log = 0
+	self._count_db = 0
+    def collect(self, heat):
+	self._count_log += heat._count_log
+	self._count_db += heat._count_db
+    def output(self):
+	print "----Statistics----"
+	print "共解析出数据 %d 条" % self._count_log
+	print "成功插入数据库 %d 条" % self._count_db
+	print "------------------"
+	
 
 class HeatLogParser(object):
     def __init__(self):
@@ -41,6 +70,10 @@ class HeatLogParser(object):
 			    continue
 			op_rate = item_level_4['op_rate']
 			op_path = item_level_4['path'].encode('utf-8')
+			# 发现path字符串最长的为403，所以把数据库op_path字段设置为varchar(500)
+			# if len(op_path) > 403:
+			#    print op_path
+			#    print len(op_path)
 		    except Exception as e:
 			# 这里有异常，打印异常信息，但并不中断程序。
 			print "寻找op_rate和op_path处异常一次: " + str(e)
@@ -64,7 +97,7 @@ class HeatLogParser(object):
             records.append((op_time, op_key, op_rate, op_path))
 	return records
 
-class Heat(object):
+class HeatMain(object):
     def __init__(self, conn, endpoint):
 	self.conn = conn
 	self.endpoint = endpoint
@@ -147,3 +180,26 @@ class Heat(object):
 		    self.conn.commit()
 	except Exception as e:
 	    raise Exception("存储数据(store_log)错误: " + str(e))
+
+
+class HeatMax(object):
+    def __init__(self):
+	self.stat = HeatStatistics()    
+
+    def statistics(self):
+	self.stat.output()
+
+    def start(self, conn, endpoints):
+	for endpoint in endpoints:
+	    try:
+		heat = HeatMain(conn, endpoint)
+		heat.fetch_log()
+		# print len(heat.logs)      
+		heat.parse_log()
+		# print len(heat.recordss)
+		raw_input("解析 %s 页面数据完毕，确认写入数据库(Ctrl-C退出): " % endpoint)
+		heat.store_log()
+		self.stat.collect(heat)
+	    except Exception as e:
+		raise Exception(str(e) + "\n出现问题的endpoint为: " + endpoint)
+

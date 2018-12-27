@@ -2,28 +2,27 @@
 # coding:utf8
 #
 import MySQLdb
-from myclass import Heat
+from myclass import HeatMain
 
-# Database info
+
+# 1.endpoint信息
+endpoint_1 = r'http://10.30.31.121/heat_log/2018-12-01_000-cluster_nodes.log'
+endpoint_2 = r'http://10.30.31.121/heat_log/2018-04-03_0000-cluster_nodes.log'
+
+# 2.数据库信息
 DB_USER = "root"
 DB_HOST = "10.30.30.121"
 DB_PASSWORD = ""
 DB_DBNAME = "test"
-
-
-endpoint_1 = r'http://10.30.31.121/2018-12-01_000-cluster_nodes.log'
-endpoint_2 = r'http://10.30.31.121/2018-04-03_0000-cluster_nodes.log'
-
-
 try:
     conn = MySQLdb.Connect(host=DB_HOST, user=DB_USER, db=DB_DBNAME)
 except Exception as e:
     print "连接数据库失败: " + str(e)
     exit()
 
-
+# 3.开始
 try:
-    heat = Heat(conn, endpoint_2)
+    heat = HeatMain(conn, endpoint_1)
     heat.fetch_log()
     # print len(heat.logs)	
     heat.parse_log()
@@ -37,5 +36,4 @@ else:
 finally:
     heat.statistics()
     conn.close()
-
 
