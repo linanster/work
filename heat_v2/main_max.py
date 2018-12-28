@@ -7,7 +7,7 @@ from myclass import HeatEndpoints
 
 # 1.收集endpoints信息
 try:
-    endpoints = HeatEndpoints('/var/www/html/heat_log/').collect()
+    endpoints = HeatEndpoints('/var/www/html/heat_log/download_cisinas03').collect()
     print "收集endpoints完成: "
     print endpoints
     raw_input("\n继续: ")
@@ -17,11 +17,11 @@ except Exception as e:
 
 # 2.数据库信息
 DB_USER = "root"
-DB_HOST = "10.30.30.121"
-DB_PASSWORD = ""
-DB_DBNAME = "test"
+DB_HOST = "10.118.252.202"
+DB_PASSWD = "123456"
+DB_DBNAME = "mk"
 try:
-    conn = MySQLdb.Connect(host=DB_HOST, user=DB_USER, db=DB_DBNAME)
+    conn = MySQLdb.Connect(host=DB_HOST, user=DB_USER, passwd=DB_PASSWD, db=DB_DBNAME)
 except Exception as e:
     print "连接数据库失败: " + str(e)
     exit()

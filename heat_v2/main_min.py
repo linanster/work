@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # coding:utf8
 #
-import MySQLdb
+from MySQLdb import Connect
 from myclass import HeatMain
 
 
@@ -11,11 +11,12 @@ endpoint_2 = r'http://10.30.31.121/heat_log/2018-04-03_0000-cluster_nodes.log'
 
 # 2.数据库信息
 DB_USER = "root"
-DB_HOST = "10.30.30.121"
-DB_PASSWORD = ""
-DB_DBNAME = "test"
+# DB_HOST = "10.30.30.121"
+DB_HOST = "10.118.252.202"
+DB_PASSWD = "123456"
+DB_DBNAME = "mk"
 try:
-    conn = MySQLdb.Connect(host=DB_HOST, user=DB_USER, db=DB_DBNAME)
+    conn = Connect(host=DB_HOST, user=DB_USER, passwd=DB_PASSWD, db=DB_DBNAME)
 except Exception as e:
     print "连接数据库失败: " + str(e)
     exit()
